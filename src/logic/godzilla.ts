@@ -45,14 +45,49 @@ export class GodzillaEngine{
         let poder = this.alientoatomico;
         if (this.supercarga) {
             poder = poder * 10
-            console.log(chalk.red.bold(`🔥 ALIENTO ATÓMICO SUPER CHARGE: ${poder} de poder!`));
+            console.log(chalk.red.bold(`🔥 ALIENTO ATOMICO SUPER CHARGE: ${poder} de poder!`));
         }
         else{
-            console.log(chalk.red(`🔥 Aliento Atómico: ${poder} de poder`));
+            console.log(chalk.red(`🔥 Aliento Atomico: ${poder} DE PODER`));
         }
         return poder
 
     }       
+
+    ejecutarRayoEspiral(): number{
+        let poder = this.rayoespiral;
+        if (this.supercarga) {
+            poder = poder * 10
+            console.log(chalk.red.bold(`🔥 RAYO ESPIRAl SUPER CHARGE: ${poder} DE PODER!`));
+        }
+        else{
+            console.log(chalk.red(`🔥 Rayo Espiral: ${poder} de poder`));
+        }
+        return poder
+    }
+
+    ejecutarRayoAtomico(): number{
+        let poder = this.rayoatomico;
+        if (this.supercarga) {
+            poder = poder * 10
+            console.log(chalk.red.bold(`🔥 RAYO ATOMICO SUPER CHARGE: ${poder} DE PODER!`));
+        }
+        else{
+            console.log(chalk.red(`🔥 Rayo Atomico: ${poder} de poder`));
+        }
+        return poder
+    }
+
+    ejecutarTodosLosAtaques(): number{
+        const ataque1 = this.ejecutarAlientoatomico();
+        const ataque2 = this.ejecutarRayoEspiral();
+        const ataque3 = this.ejecutarRayoAtomico();
+        console.log(chalk.red.bold(`🔥 TODOS LOS ATAQUES: ${ataque1 + ataque2 + ataque3} DE PODER`));
+        console.log(chalk.red.bold(`🔥 GODZILLA HA ATACADO LA NAVE`));
+        this.audio.playRoar();
+        console.log(chalk.red.bold(`🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`));
+        return ataque1 + ataque2 + ataque3;
+    }
 
 
 
