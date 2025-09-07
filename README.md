@@ -24,7 +24,7 @@ Eres el piloto de una nave especial equipada con armamento avanzado. Debes deten
 
 1. Clona el repositorio:
    ```bash
-   git clone [URL_DEL_REPOSITORIO]
+   git clone https://github.com/jumaster23/Godzilla.git
    cd salvar-mundo
    ```
 
@@ -72,7 +72,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🙏 Créditos
 
-Desarrollado con ❤️ por [Tu Nombre]
+Desarrollado por Jesus M. Juma
 
 ---
 
