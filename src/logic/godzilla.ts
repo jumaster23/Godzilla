@@ -37,6 +37,7 @@ export class GodzillaEngine{
         console.log(chalk.red(' Godzilla activo su supercarga, los ataques seran mas fuertes'));
 
     }
+    
     esta_superccarga_activada(): boolean{
         return this.supercarga;
     }
