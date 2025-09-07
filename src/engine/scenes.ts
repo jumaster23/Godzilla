@@ -83,4 +83,51 @@ export class sceneManager {
     
     }
 
-}
+
+    escenaescape(progreso: number): string {
+        console.clear();
+        console.log("PREPARANDO SECUENCIA DE ESCAPE...\n");
+    
+        let cohete = `            
+                                    /\\
+                                   /  \\
+                                  /    \\
+                                 /______\\
+                                |        |
+                                |        |
+                                |        |
+                                |        |
+                                |        |
+                                |        |
+                               /|   ||   |\\
+                              / |   ||   | \\
+                             /  |   ||   |  \\
+                            /___|   ||   |___\\
+                                |        |
+                                 \\      /
+                                  ||  || 
+    `;
+    
+        let fuego = "";
+    
+        if (progreso > 25) {
+            fuego += `            🔥🔥🔥🔥🔥🔥🔥`;
+        }
+        if (progreso > 50) {
+            fuego += `        🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`;
+            fuego += `        🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`;
+        }
+        if (progreso > 75) {
+            fuego += `          🔥🔥🔥🔥🔥🔥🔥🔥`;
+            fuego += `             🔥🔥🔥🔥🔥🔥`;
+            fuego += `               🔥🔥🔥🔥`;
+            fuego += `                  🔥🔥`;
+            fuego += `                   🔥`;
+        }
+    
+        return cohete + fuego;
+    }
+    
+}      
+
+

@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 const readline = require('readline-sync');
+import { sceneManager } from '../engine/scenes';
 
 export class Calculoslogicos {
     
@@ -49,7 +50,7 @@ export class Calculoslogicos {
     }
 }
     
-    private activacionVelo(distancia: number): boolean{
+    activacionVelo(distancia: number): boolean{
         
         if (distancia < 300){
             console.log(chalk.red('👻 VELO DE INVISIBILIDAD ACTIVADO'));
@@ -62,14 +63,133 @@ export class Calculoslogicos {
     }            
             
     async revaluodistancia(){
-        let sigilo = false;
-        while(!sigilo){
-            let buscandodistancia = this.calculateDistance();
-            sigilo = this.activacionVelo(buscandodistancia);
+            let sigilo = false;
+            while(!sigilo){
+                let buscandodistancia = this.calculateDistance();
+                sigilo = this.activacionVelo(buscandodistancia);
+            }
         }
+
+    generarCodigoSeguridad(): number[]{
+        console.log(chalk.blue.bold('\n🔐 GENERANDO CODIGO DE SEGURIDAD...'));
+        const codigo: number[] = [];
+        const rangolimite: number = 20
+        const adicional: number = 1
+        while(codigo.length < 10){
+            const n = Math.floor(Math.random() * rangolimite) + adicional;
+            const number = 50 * n + 1;
+            if(!codigo.includes(number)){
+                codigo.push(number);
+            }
+        }
+        // Aqui se esta ordenando 
+        codigo.sort((a, b) => b - a);
+        console.log(chalk.green('🔐 Codigo de seguridad generado:'));
+        console.log(chalk.green(`   ${codigo.join(' - ')}`));
+        return codigo;
     }
+
+    async launchSequence(): Promise<void> {
+       
+        console.log(`            
+                                /\
+                               /  \
+                              /    \
+                             /______\
+                            |        |
+                            |        |
+                            |        |
+                            |        |
+                            |        |
+                            |        |
+                           /|   ||   |\
+                          / |   ||   | \
+                         /  |   ||   |  \
+                        /___|   ||   |___\
+                            |        |
+                             \      /
+                              ||  ||`);
+
+
+        console.log(chalk.yellow('Secuencia de 2 minutos en escala 5x (24 segundos reales)'));
+        
+        const totalSegundosSimilados = 120; // 2 minutos
+        const escala5x = 200; // 200ms reales por segundo simulado (escala 5x)
+        const intervaloActualizacion = 5; // Actualizar cada 5 segundos simulados
+        
+            //Creando un for para secuencia
+        for (let TiempoSimulado = 0; TiempoSimulado <= totalSegundosSimilados; TiempoSimulado += intervaloActualizacion) {
+            const minutos= Math.floor(TiempoSimulado / 60);
+            const segundos = TiempoSimulado % 60;
+            const reloj = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            
+            const progreso = (TiempoSimulado / totalSegundosSimilados) * 100;
+            
+            // Mostrar escena visual de la secuencia de despegue
+            console.clear();
+            const sceneManagerInstance = new sceneManager();
+            sceneManagerInstance.escenaescape(progreso);
+            
+            const progressBar = '█'.repeat(Math.floor(progreso / 5)) + '░'.repeat(20 - Math.floor(progreso / 5));
+            
+            
+            // Efecto visual dinámico según el progreso
+            if (progreso < 25) {
+                console.log(chalk.blue(`⏱️  T+${reloj} | [${progressBar}] ${progreso.toFixed(1)}% - INICIANDO MOTORES`));
+            } else if (progreso < 50) {
+                console.log(chalk.yellow(`⏱️  T+${reloj} | [${progressBar}] ${progreso.toFixed(1)}% - CALENTANDO PROPULSORES`));
+            } else if (progreso < 75) {
+                console.log(chalk.yellow(`⏱️  T+${reloj} | [${progressBar}] ${progreso.toFixed(1)}% - PREPARANDO DESPEGUE`));
+            } else if (progreso < 100) {
+                console.log(chalk.red(`⏱️  T+${reloj} | [${progressBar}] ${progreso.toFixed(1)}% - DESPEGUE INMINENTE`));
+            } else {
+                console.log(chalk.green(`⏱️  T+${reloj} | [${progressBar}] ${progreso.toFixed(1)}% - DESPEGUE COMPLETO`));
+            }
+            
+            if (TiempoSimulado< totalSegundosSimilados) {
+                await new Promise(resolve => setTimeout(resolve, escala5x * intervaloActualizacion));
+            }
+
+        
+        console.log(chalk.green('⭐⭐⭐ DESPEGUE EXITOSO ⭐⭐⭐'));
+        }
+
+
+
+}  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 }
-
