@@ -78,15 +78,31 @@ export class GodzillaEngine{
         return poder
     }
 
-    ejecutarTodosLosAtaques(): number{
-        const ataque1 = this.ejecutarAlientoatomico();
-        const ataque2 = this.ejecutarRayoEspiral();
-        const ataque3 = this.ejecutarRayoAtomico();
-        console.log(chalk.red.bold(`🔥 TODOS LOS ATAQUES: ${ataque1 + ataque2 + ataque3} DE PODER`));
-        console.log(chalk.red.bold(`🔥 GODZILLA HA ATACADO LA NAVE`));
-        this.audio.playRoar();
-        console.log(chalk.red.bold(`🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`));
-        return ataque1 + ataque2 + ataque3;
+    async executeAllAttacks(): Promise<number> {
+        console.log(chalk.red.bold('🦖 GODZILLA EJECUTA TODOS SUS ATAQUES!'));
+        
+        const breathPower = await this.ejecutarAlientoatomico();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const rayPower = await this.ejecutarRayoEspiral();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const tailPower = await this.ejecutarRayoAtomico();
+        
+        const totalPower = breathPower + rayPower + tailPower;
+        console.log(chalk.red.bold(`💥 PODER TOTAL DE ATAQUE: ${totalPower}`));
+        
+        return totalPower;
+    }
+
+    getAttackPower(): { atomicBreath: number; spiralRay: number; tailStrike: number } {
+        const multiplier = this.supercarga ? 10 : 1;
+        
+        return {
+            atomicBreath: this.alientoatomico * multiplier,
+            spiralRay: this.rayoespiral * multiplier,
+            tailStrike: this.rayoatomico * multiplier
+        };
     }
 
 
