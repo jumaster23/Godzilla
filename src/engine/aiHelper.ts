@@ -12,7 +12,7 @@ export class AIHelper {
         console.log(chalk.cyan.bold('\n🤖 CONSEJO DE IA, TU ALIADA🤖'));
         
         switch (escenario) {
-            case 'propulsor_failure':
+            case 'fallopropulsor':
                 if (!propulsorIzquiero && !propulsorDerecho) {
                     return chalk.red('⚠️  CRÍTICO: Ambos propulsores fallaron. Super Charge inminente. Recomiendo activar protocolo de emergencia y preparar para combate directo.');
                 } else if (!propulsorIzquiero || !propulsorDerecho) {
@@ -20,7 +20,7 @@ export class AIHelper {
                 }
                 break;
                 
-            case 'distance_calculation':
+            case 'calculodistancia':
                 if (distancia && distancia < 300) {
                     return chalk.yellow('👻 SIGILO: Distancia critica detectada. Activa velo de invisibilidad y reposiciona la nave inmediatamente.');
                 } else if (distancia && distancia >= 300) {
@@ -48,7 +48,7 @@ export class AIHelper {
         return chalk.blue('🤖 IA: Situación analizada. Procede con precaucion.');
     }
 
-    async provideAdvice(escenario: string, contexto: any): Promise<void> {
+    async darConsejo(escenario: string, contexto: any): Promise<void> {
         // Mostrar ASCII art épico de IA
         console.log( `╔══════════════════════════════════════════════════════════════╗
             ║                    🤖 IA ALIADA ACTIVADA 🤖                  ║

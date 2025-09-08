@@ -17,9 +17,8 @@ export class sceneManager {
     async intro(): Promise<void> {
         console.clear();
         
-        console.log(chalk.yellow("==========================================================================="));
-        console.log(chalk.yellow("===================== BIENVENIDO A SALVANDO AL MUNDO ======================"));
-        console.log(chalk.yellow("==========================================================================="));
+        console.log(chalk.yellow("BIENVENIDO A SALVANDO AL MUNDO"));
+       
         await new Promise(resolve => setTimeout(resolve, 3000));
        
         

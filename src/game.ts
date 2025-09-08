@@ -10,385 +10,315 @@ import { AIHelper } from './engine/aiHelper';
 
 export class Game {
     private sceneManager: sceneManager;
-    private audio: audio;
-    private godzilla: GodzillaEngine;
-    private propulsionSystem: propulsores;
     private calculations: Calculoslogicos;
+    private godzilla: GodzillaEngine;
+    private propulsion: propulsores;
     private aiHelper: AIHelper;
-    
-    private playerHealth: number;
-    private gameState: 'menu' | 'playing' | 'combat' | 'escape' | 'victory' | 'defeat';
-    private missionProgress: number;
-    private distanciaAGodzilla: number;
-    
+    private gameState: {
+        codigoSeguridad: number[];
+        distanciaCalculada: number;
+        propulsoresFuncionando: boolean[];
+        misionCompleta: boolean;
+        combateActivo: boolean;
+    };
+
     constructor() {
         this.sceneManager = new sceneManager();
-        this.audio = new audio();
-        this.godzilla = new GodzillaEngine();
-        this.propulsionSystem = new propulsores();
         this.calculations = new Calculoslogicos();
+        this.godzilla = new GodzillaEngine();
+        this.propulsion = new propulsores();
         this.aiHelper = new AIHelper();
         
-        this.playerHealth = 100;
-        this.gameState = 'menu';
-        this.missionProgress = 0;
-        this.distanciaAGodzilla = 0;
+        this.gameState = {
+            codigoSeguridad: [],
+            distanciaCalculada: 0,
+            propulsoresFuncionando: [true, true],
+            misionCompleta: false,
+            combateActivo: false
+        };
     }
 
-    async inicio(): Promise<void> {
+    // Método principal que ejecuta toda la secuencia del juego
+    async iniciarJuego(): Promise<void> {
+        try {
+            console.clear();
+            
+            // FASE 1: Introducción épica
+            await this.ejecutarIntroduccion();
+            
+            // FASE 2: Generación de código de seguridad
+            await this.ejecutarGeneracionCodigo();
+            
+            // FASE 3: Cálculo de distancia y sistema de sigilo
+            await this.ejecutarSistemaDistancia();
+            
+            // FASE 4: Verificación de propulsores y análisis de potencia
+            await this.ejecutarVerificacionPropulsores();
+            
+            // FASE 5: Consulta con IA Aliada
+            await this.ejecutarConsultaIA();
+            
+            // FASE 6: Decisión crítica - ¿Combate o Escape?
+            await this.ejecutarDecisionCritica();
+            
+            // FASE 7: Secuencia final
+            await this.ejecutarSecuenciaFinal();
+            
+        } catch (error) {
+            console.log(chalk.red('\n❌ Error crítico en el sistema:'), error);
+            await this.sceneManager.escenaDerrota();
+        }
+    }
+
+    private async ejecutarIntroduccion(): Promise<void> {
+        console.log(chalk.cyan.bold('\n🎮 INICIANDO PROTOCOLO DE EMERGENCIA GLOBAL...'));
+        await this.pausa(2000);
+        
         await this.sceneManager.intro();
-        await this.audio.introinicio();
         
-        this.gameState = 'playing';
-        await this.mainGameLoop();
+        console.log(chalk.yellow('\n📋 MISIÓN: Escapar de Godzilla y salvar a la humanidad'));
+        console.log(chalk.yellow('⚠️  ADVERTENCIA: Cada decisión puede ser la diferencia entre la vida y la muerte'));
+        await this.pausa(3000);
     }
 
-    private async mainGameLoop(): Promise<void> {
-        while (this.gameState === 'playing') {
-            await this.showMainMenu();
-            const choice = this.getUserChoice();
-            await this.processChoice(choice);
-            
-            // Verificar condiciones de victoria/derrota
-            if (this.playerHealth <= 0) {
-                this.gameState = 'defeat';
-                break;
-            }
-            
-            if (this.missionProgress >= 100) {
-                this.gameState = 'victory';
-                break;
-            }
-        }
+    private async ejecutarGeneracionCodigo(): Promise<void> {
+        console.log(chalk.blue.bold('\n🔐 FASE 1: GENERANDO CÓDIGOS DE ACCESO AL SISTEMA DE ESCAPE'));
+        console.log(chalk.gray('Estableciendo credenciales de seguridad...'));
         
-        await this.endGame();
+        await this.pausa(1000);
+        
+        // Generar código de seguridad
+        this.gameState.codigoSeguridad = this.calculations.generarCodigoSeguridad();
+        
+        console.log(chalk.green('✅ Códigos de seguridad establecidos exitosamente'));
+        await this.pausa(2000);
     }
 
-    private async showMainMenu(): Promise<void> {
-        console.clear();
-        console.log(chalk.cyan.bold('\n🚀 CENTRO DE COMANDO - MISIÓN SALVACIÓN MUNDIAL 🚀'));
-        console.log(chalk.white('═'.repeat(60)));
+    private async ejecutarSistemaDistancia(): Promise<void> {
+        console.log(chalk.blue.bold('\n📡 FASE 2: SISTEMA DE DETECCIÓN Y SIGILO'));
+        console.log(chalk.gray('Calculando distancia a Godzilla y activando contramedidas...'));
         
-        // Mostrar estado actual
-        console.log(chalk.green(`❤️  Salud de la nave: ${this.playerHealth}%`));
-        console.log(chalk.blue(`📊 Progreso de misión: ${this.missionProgress}%`));
-        console.log(chalk.yellow(`🎯 Distancia a Godzilla: ${this.distanciaAGodzilla.toFixed(2)}m`));
+        await this.pausa(1000);
         
-        // Estado de propulsores
-        const estadoIzq = this.propulsionSystem.estadoPropulsorIzquierdo() ? '✅' : '❌';
-        const estadoDer = this.propulsionSystem.estadoPropulsorDerecho() ? '✅' : '❌';
-        console.log(chalk.white(`🔧 Propulsores: Izq=${estadoIzq} Der=${estadoDer}`));
+        // Ejecutar cálculo de distancia y sistema de sigilo
+        this.calculations.revaluodistancia();
         
-        if (this.godzilla.esta_superccarga_activada()) {
-            console.log(chalk.red.bold('⚡ ¡ADVERTENCIA: GODZILLA EN MODO SUPERCARGA!'));
-        }
+        // Simular obtención de la distancia para el estado del juego
+        this.gameState.distanciaCalculada = this.calculations.calculateDistance();
         
-        console.log(chalk.white('═'.repeat(60)));
-        console.log(chalk.cyan('OPCIONES DISPONIBLES:'));
-        console.log(chalk.white('1. 📏 Calcular distancia a Godzilla'));
-        console.log(chalk.white('2. 🔧 Verificar sistemas de propulsión'));
-        console.log(chalk.white('3. 🚀 Intentar secuencia de escape'));
-        console.log(chalk.white('4. ⚔️  Combate directo contra Godzilla'));
-        console.log(chalk.white('5. 🔐 Generar código de seguridad'));
-        console.log(chalk.white('6. 🤖 Consultar IA estratégica'));
-        console.log(chalk.white('7. 📊 Análisis completo de situación'));
-        console.log(chalk.white('0. ❌ Abandonar misión'));
-    }
-
-    private getUserChoice(): number {
-        const choice = readline.questionInt(chalk.yellow('\n➤ Selecciona una opción: '));
-        return choice;
-    }
-
-    private async processChoice(choice: number): Promise<void> {
-        switch (choice) {
-            case 1:
-                await this.calculateDistanceModule();
-                break;
-            case 2:
-                await this.verifyPropulsionSystems();
-                break;
-            case 3:
-                await this.attemptEscapeSequence();
-                break;
-            case 4:
-                await this.enterCombat();
-                break;
-            case 5:
-                await this.generateSecurityCode();
-                break;
-            case 6:
-                await this.consultAI();
-                break;
-            case 7:
-                await this.fullSituationAnalysis();
-                break;
-            case 0:
-                console.log(chalk.red('Abandonando misión... La humanidad está condenada.'));
-                this.gameState = 'defeat';
-                break;
-            default:
-                console.log(chalk.red('❌ Opción inválida. Inténtalo de nuevo.'));
-                readline.question(chalk.yellow('Presiona Enter para continuar...'));
-        }
-    }
-
-    private async calculateDistanceModule(): Promise<void> {
-        console.log(chalk.blue.bold('\n🎯 MÓDULO DE CÁLCULO DE DISTANCIA'));
-        
-        this.distanciaAGodzilla = this.calculations.calculateDistance();
-        
-        // Activar velo de invisibilidad si es necesario
-        const isSafe = this.calculations.activacionVelo(this.distanciaAGodzilla);
-        
-        if (!isSafe) {
-            console.log(chalk.red('👻 Reposicionándote automáticamente...'));
-            this.calculations.revaluodistancia();
-        }
-        
-        // Avance de Godzilla
+        // Godzilla se acerca basado en la distancia
         this.godzilla.cercania();
         
-        // Consultar IA automáticamente
-        await this.aiHelper.provideAdvice('distance_calculation', {
-            propulsorIzquiero: this.propulsionSystem.estadoPropulsorIzquierdo(),
-            propulsorDerecho: this.propulsionSystem.estadoPropulsorDerecho(),
-            distancia: this.distanciaAGodzilla
-        });
-        
-        this.missionProgress += 10;
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
+        console.log(chalk.green('✅ Sistema de sigilo configurado'));
+        await this.pausa(2000);
     }
 
-    private async verifyPropulsionSystems(): Promise<void> {
-        console.log(chalk.blue.bold('\n🔧 VERIFICACIÓN DE SISTEMAS DE PROPULSIÓN'));
+    private async ejecutarVerificacionPropulsores(): Promise<void> {
+        console.log(chalk.blue.bold('\n🚀 FASE 3: DIAGNÓSTICO DE SISTEMAS DE PROPULSIÓN'));
+        console.log(chalk.gray('Verificando integridad de los propulsores...'));
         
-        // Simular posibles fallas aleatorias
-        if (Math.random() < 0.3) {
-            const leftFail = Math.random() < 0.5;
-            const rightFail = Math.random() < 0.5;
+        await this.pausa(1000);
+        
+        // Verificar estado de propulsores
+        const verificacionPropulsores = this.propulsion.verificarpropulsores();
+        
+        console.log(chalk.blue(`📊 Diagnóstico de propulsores: ${verificacionPropulsores}%`));
+        
+        // Simular posible fallo de propulsores (25% de probabilidad)
+        if (Math.random() < 0.25) {
+            const fallaIzquierdo = Math.random() < 0.5;
+            const fallaDerecho = Math.random() < 0.5;
             
-            if (leftFail || rightFail) {
-                console.log(chalk.red('⚠️  ¡FALLA DETECTADA EN SISTEMA DE PROPULSIÓN!'));
-                this.propulsionSystem.estadoambospropulsores(!leftFail, !rightFail);
-                
-                await this.aiHelper.provideAdvice('propulsor_failure', {
-                    propulsorIzquiero: !leftFail,
-                    propulsorDerecho: !rightFail
-                });
+            this.propulsion.estadoambospropulsores(!fallaIzquierdo, !fallaDerecho);
+            this.gameState.propulsoresFuncionando = [!fallaIzquierdo, !fallaDerecho];
+            
+            console.log(chalk.red('⚠️  ALERTA: Fallo detectado en sistema de propulsión'));
+        }
+        
+        // Análisis de potencia
+        const analisisPotencia = this.propulsion.calculopodernave();
+        
+        if (analisisPotencia.lanzamiento) {
+            console.log(chalk.green('✅ Sistemas de propulsión: OPERATIVOS'));
+        } else {
+            console.log(chalk.yellow('⚠️  Sistemas de propulsión: CRÍTICO'));
+        }
+        
+        await this.pausa(2000);
+    }
+
+    private async ejecutarConsultaIA(): Promise<void> {
+        console.log(chalk.blue.bold('\n🤖 FASE 4: CONSULTA CON IA ALIADA'));
+        console.log(chalk.gray('Analizando situación táctica...'));
+        
+        await this.pausa(1000);
+        
+        // Consultar con IA sobre diferentes escenarios
+        const contexto = {
+            propulsorIzquiero: this.gameState.propulsoresFuncionando[0],
+            propulsorDerecho: this.gameState.propulsoresFuncionando[1],
+            distancia: this.gameState.distanciaCalculada
+        };
+        
+        await this.aiHelper.darConsejo('propulsor_failure', contexto);
+        await this.pausa(1000);
+        await this.aiHelper.darConsejo('distance_calculation', contexto);
+        await this.pausa(1000);
+        await this.aiHelper.darConsejo('launch_decision', contexto);
+        
+        console.log(chalk.green('✅ Análisis de IA completado'));
+        await this.pausa(2000);
+    }
+
+    private async ejecutarDecisionCritica(): Promise<void> {
+        console.log(chalk.red.bold('\n⚔️  FASE 5: DECISIÓN CRÍTICA'));
+        console.log(chalk.yellow('Godzilla se acerca rápidamente. Debes decidir:'));
+        console.log(chalk.yellow('1. 🚀 ESCAPE - Intentar despegue inmediato'));
+        console.log(chalk.yellow('2. ⚔️  COMBATE - Enfrentar a Godzilla directamente'));
+        
+        await this.pausa(2000);
+        
+        // Evaluar si ambos propulsores están dañados
+        if (!this.gameState.propulsoresFuncionando[0] && !this.gameState.propulsoresFuncionando[1]) {
+            console.log(chalk.red.bold('💀 AMBOS PROPULSORES DAÑADOS - COMBATE FORZOSO'));
+            this.godzilla.supercargaActivo();
+            this.propulsion.supercargaActivo();
+            this.gameState.combateActivo = true;
+            
+            await this.sceneManager.mostrarsupercargas();
+            await this.aiHelper.darConsejo('super_charge', {});
+        } else {
+            // Decisión basada en el análisis de potencia
+            const intentoLanzamiento = this.propulsion.intentoLanzamiento();
+            
+            if (intentoLanzamiento.suceso) {
+                console.log(chalk.green('🚀 DECISIÓN: SECUENCIA DE ESCAPE AUTORIZADA'));
+                this.gameState.combateActivo = false;
+            } else {
+                console.log(chalk.red('⚔️  DECISIÓN: COMBATE DIRECTO INEVITABLE'));
+                this.gameState.combateActivo = true;
             }
         }
         
-        // Realizar análisis de potencia
-        const analysis = this.propulsionSystem.calculopodernave();
-        const verification = this.propulsionSystem.verificarpropulsores();
-        
-        console.log(chalk.green(`🔋 Verificación de propulsores: ${verification}%`));
-        
-        if (this.propulsionSystem.esta_superccarga_activada()) {
-            this.sceneManager.mostrarsupercargas();
-            this.godzilla.supercargaActivo();
-        }
-        
-        this.missionProgress += 15;
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
+        await this.pausa(3000);
     }
 
-    private async attemptEscapeSequence(): Promise<void> {
-        console.log(chalk.blue.bold('\n🚀 INICIANDO SECUENCIA DE ESCAPE'));
-        
-        // Consultar IA para decisión de lanzamiento
-        await this.aiHelper.provideAdvice('launch_decision', {
-            propulsorIzquiero: this.propulsionSystem.estadoPropulsorIzquierdo(),
-            propulsorDerecho: this.propulsionSystem.estadoPropulsorDerecho()
-        });
-        
-        const launchAttempt = this.propulsionSystem.intentoLanzamiento();
-        
-        if (launchAttempt.suceso) {
-            console.log(chalk.green(launchAttempt.mensaje));
-            await this.audio.playRocketstartup();
-            
-            // Ejecutar secuencia de lanzamiento
-            await this.calculations.launchSequence();
-            
-            // Victoria si el escape es exitoso
-            this.missionProgress = 100;
-            console.log(chalk.green.bold('🎉 ¡ESCAPE EXITOSO! ¡LA HUMANIDAD ESTÁ SALVADA!'));
+    private async ejecutarSecuenciaFinal(): Promise<void> {
+        if (this.gameState.combateActivo) {
+            await this.ejecutarCombateFinal();
         } else {
-            console.log(chalk.red(launchAttempt.mensaje));
-            await this.audio.playRocketfail();
-            
-            // Penalización por fallo
-            this.playerHealth -= 20;
-            
-            if (this.propulsionSystem.esta_superccarga_activada()) {
-                console.log(chalk.red.bold('💀 SUPERCARGA ACTIVADA - SITUACIÓN CRÍTICA'));
-                this.playerHealth -= 30;
-            }
+            await this.ejecutarEscapeFinal();
         }
-        
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
     }
 
-    private async enterCombat(): Promise<void> {
-        console.log(chalk.red.bold('\n⚔️  INICIANDO COMBATE CONTRA GODZILLA'));
+    private async ejecutarCombateFinal(): Promise<void> {
+        console.log(chalk.red.bold('\n⚔️  FASE FINAL: COMBATE CONTRA GODZILLA'));
         
-        await this.aiHelper.provideAdvice('combat_vs_escape', {
-            propulsorIzquiero: this.propulsionSystem.estadoPropulsorIzquierdo(),
-            propulsorDerecho: this.propulsionSystem.estadoPropulsorDerecho()
-        });
+        await this.sceneManager.escenaCombate();
+        await this.pausa(2000);
         
-        this.gameState = 'combat';
-        this.sceneManager.escenaCombate();
+        // Ejecutar todos los ataques de Godzilla
+        const poderGodzilla = await this.godzilla.executeAllAttacks();
+        const poderNave = this.propulsion.conseguirPoderbase();
         
-        // Ejecutar combate
-        const godzillaAttackPower = await this.godzilla.executeAllAttacks();
-        const shipPower = this.propulsionSystem.conseguirPoderbase();
+        console.log(chalk.blue(`⚔️  PODER DE LA NAVE: ${poderNave}`));
+        console.log(chalk.red(`🦖 PODER DE GODZILLA: ${poderGodzilla}`));
         
-        console.log(chalk.blue(`🚀 Poder de la nave: ${shipPower}`));
-        console.log(chalk.red(`🦖 Poder de ataque de Godzilla: ${godzillaAttackPower}`));
-        
-        if (shipPower > godzillaAttackPower) {
-            console.log(chalk.green.bold('🏆 ¡VICTORIA EN COMBATE!'));
-            this.missionProgress += 50;
-            this.playerHealth += 10; // Bonus por victoria
+        if (poderNave > poderGodzilla) {
+            console.log(chalk.green.bold('\n🎉 ¡VICTORIA! La nave ha derrotado a Godzilla!'));
+            await this.sceneManager.escenaVictoria();
+            this.gameState.misionCompleta = true;
         } else {
-            console.log(chalk.red.bold('💀 DERROTA EN COMBATE'));
-            this.playerHealth -= Math.floor(godzillaAttackPower / 100);
-            
-            // Activar supercarga de Godzilla tras combate
-            this.godzilla.supercargaActivo();
-            this.propulsionSystem.supercargaActivo();
+            console.log(chalk.red.bold('\n💀 DERROTA... Godzilla ha destruido la nave'));
+            await this.sceneManager.escenaDerrota();
         }
-        
-        this.gameState = 'playing';
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
     }
 
-    private async generateSecurityCode(): Promise<void> {
-        console.log(chalk.blue.bold('\n🔐 GENERANDO CÓDIGO DE SEGURIDAD'));
+    private async ejecutarEscapeFinal(): Promise<void> {
+        console.log(chalk.blue.bold('\n🚀 FASE FINAL: SECUENCIA DE ESCAPE'));
+        console.log(chalk.gray('Iniciando protocolo de evacuación planetaria...'));
         
-        const securityCode = this.calculations.generarCodigoSeguridad();
+        await this.pausa(1000);
         
-        console.log(chalk.green('✅ Código de seguridad generado exitosamente'));
-        console.log(chalk.yellow('Este código puede ser usado para sistemas críticos de emergencia.'));
+        // Ejecutar secuencia de lanzamiento
+        await this.calculations.launchSequence();
         
-        this.missionProgress += 5;
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
-    }
-
-    private async consultAI(): Promise<void> {
-        console.log(chalk.blue.bold('\n🤖 CONSULTA CON IA ESTRATÉGICA'));
+        // Verificar si Godzilla alcanza la nave
+        const godzillaAlcanza = this.godzilla.avancegodzilla(this.gameState.distanciaCalculada);
         
-        // Determinar escenario basado en el estado actual
-        let scenario = 'default';
-        
-        if (this.godzilla.esta_superccarga_activada()) {
-            scenario = 'super_charge';
-        } else if (!this.propulsionSystem.estadoPropulsorIzquierdo() || !this.propulsionSystem.estadoPropulsorDerecho()) {
-            scenario = 'propulsor_failure';
-        } else if (this.distanciaAGodzilla > 0 && this.distanciaAGodzilla < 300) {
-            scenario = 'distance_calculation';
+        if (!godzillaAlcanza) {
+            console.log(chalk.green.bold('\n🎉 ¡ESCAPE EXITOSO! La humanidad ha sido salvada!'));
+            await this.sceneManager.escenaVictoria();
+            this.gameState.misionCompleta = true;
         } else {
-            scenario = 'combat_vs_escape';
+            console.log(chalk.red.bold('\n💀 Godzilla alcanzó la nave durante el despegue...'));
+            await this.sceneManager.escenaDerrota();
         }
-        
-        await this.aiHelper.provideAdvice(scenario, {
-            propulsorIzquiero: this.propulsionSystem.estadoPropulsorIzquierdo(),
-            propulsorDerecho: this.propulsionSystem.estadoPropulsorDerecho(),
-            distancia: this.distanciaAGodzilla
-        });
-        
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
     }
 
-    private async fullSituationAnalysis(): Promise<void> {
-        console.log(chalk.blue.bold('\n📊 ANÁLISIS COMPLETO DE SITUACIÓN'));
-        console.log(chalk.white('═'.repeat(70)));
+    // Método para mostrar resumen final
+    async mostrarResumenFinal(): Promise<void> {
+        console.log(chalk.cyan.bold('\n📊 RESUMEN DE LA MISIÓN'));
+        console.log(chalk.cyan('═'.repeat(50)));
         
-        // Estado de la nave
-        console.log(chalk.cyan.bold('🚀 ESTADO DE LA NAVE:'));
-        console.log(chalk.white(`   ❤️  Salud: ${this.playerHealth}%`));
-        console.log(chalk.white(`   📊 Progreso: ${this.missionProgress}%`));
-        console.log(chalk.white(`   🔋 Poder base: ${this.propulsionSystem.conseguirPoderbase()}`));
+        console.log(chalk.blue(`🔐 Código de seguridad: ${this.gameState.codigoSeguridad.slice(0, 3).join('-')}...`));
+        console.log(chalk.blue(`📡 Distancia final: ${this.gameState.distanciaCalculada.toFixed(2)} metros`));
+        console.log(chalk.blue(`🚀 Propulsor izquierdo: ${this.gameState.propulsoresFuncionando[0] ? '✅' : '❌'}`));
+        console.log(chalk.blue(`🚀 Propulsor derecho: ${this.gameState.propulsoresFuncionando[1] ? '✅' : '❌'}`));
+        console.log(chalk.blue(`⚔️  Modo combate: ${this.gameState.combateActivo ? 'SÍ' : 'NO'}`));
+        console.log(chalk.blue(`🎯 Misión completada: ${this.gameState.misionCompleta ? '✅' : '❌'}`));
         
-        // Estado de propulsores
-        console.log(chalk.cyan.bold('\n🔧 SISTEMAS DE PROPULSIÓN:'));
-        const estadoIzq = this.propulsionSystem.estadoPropulsorIzquierdo() ? 'OPERATIVO' : 'FALLA';
-        const estadoDer = this.propulsionSystem.estadoPropulsorDerecho() ? 'OPERATIVO' : 'FALLA';
-        console.log(chalk.white(`   🔧 Propulsor izquierdo: ${estadoIzq}`));
-        console.log(chalk.white(`   🔧 Propulsor derecho: ${estadoDer}`));
-        console.log(chalk.white(`   ⚡ Supercarga activa: ${this.propulsionSystem.esta_superccarga_activada() ? 'SÍ' : 'NO'}`));
-        
-        // Estado de Godzilla
-        console.log(chalk.cyan.bold('\n🦖 AMENAZA - GODZILLA:'));
-        console.log(chalk.white(`   📍 Distancia: ${this.distanciaAGodzilla.toFixed(2)}m`));
-        console.log(chalk.white(`   ⚡ Supercarga: ${this.godzilla.esta_superccarga_activada() ? 'ACTIVADA' : 'INACTIVA'}`));
-        
-        const attacks = this.godzilla.getAttackPower();
-        console.log(chalk.white(`   🔥 Aliento atómico: ${attacks.atomicBreath}`));
-        console.log(chalk.white(`   ⚡ Rayo espiral: ${attacks.spiralRay}`));
-        console.log(chalk.white(`   💥 Golpe de cola: ${attacks.tailStrike}`));
-        
-        // Recomendaciones
-        console.log(chalk.cyan.bold('\n🤖 RECOMENDACIONES ESTRATÉGICAS:'));
-        const movementAdvice = this.aiHelper.movimientoSugerido(this.distanciaAGodzilla, this.playerHealth);
-        console.log(chalk.white(`   📋 ${movementAdvice}`));
-        
-        // Análisis de probabilidad de éxito
-        const launchAnalysis = this.propulsionSystem.calculopodernave();
-        console.log(chalk.cyan.bold('\n📈 ANÁLISIS DE VIABILIDAD:'));
-        console.log(chalk.white(`   🎯 Probabilidad de escape: ${launchAnalysis.lanzamiento ? 'ALTA' : 'BAJA'}`));
-        console.log(chalk.white(`   ⚠️  Nivel de riesgo: ${this.playerHealth < 30 ? 'CRÍTICO' : this.playerHealth < 60 ? 'ALTO' : 'MODERADO'}`));
-        
-        console.log(chalk.white('═'.repeat(70)));
-        readline.question(chalk.yellow('\nPresiona Enter para continuar...'));
-    }
-
-    private async endGame(): Promise<void> {
-        if (this.gameState === 'victory') {
-            this.sceneManager.escenaVictoria();
-            console.log(chalk.green.bold(`
-            🏆 ¡MISIÓN COMPLETADA EXITOSAMENTE! 🏆
-            
-            Has salvado a la humanidad de Godzilla.
-            Puntuación final: ${this.missionProgress}/100
-            Salud restante: ${this.playerHealth}%
-            
-            ¡Eres un verdadero héroe!
-            `));
+        if (this.gameState.misionCompleta) {
+            console.log(chalk.green.bold('\n🌟 ¡ERES UN HÉROE! Has salvado a la humanidad'));
         } else {
-            this.sceneManager.escenaDerrota();
-            console.log(chalk.red.bold(`
-            💀 MISIÓN FALLIDA 💀
-            
-            La humanidad ha caído ante Godzilla.
-            Progreso alcanzado: ${this.missionProgress}/100
-            
-            Pero no todo está perdido...
-            La próxima vez podrías ser tú quien salve al mundo.
-            `));
-        }
-        
-        const playAgain = readline.question(chalk.yellow('\n¿Quieres jugar de nuevo? (s/n): '));
-        if (playAgain.toLowerCase() === 's' || playAgain.toLowerCase() === 'si') {
-            // Reiniciar el juego
-            this.resetGame();
-            await this.inicio();
-        } else {
-            console.log(chalk.blue('¡Gracias por jugar! 🚀'));
+            console.log(chalk.red.bold('\n💀 La humanidad ha caído... pero tu sacrificio será recordado'));
         }
     }
 
-    private resetGame(): void {
-        this.playerHealth = 100;
-        this.gameState = 'menu';
-        this.missionProgress = 0;
-        this.distanciaAGodzilla = 0;
+    // Método auxiliar para pausas
+    private async pausa(milisegundos: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, milisegundos));
+    }
+
+    // Método para reiniciar el juego
+    async reiniciarJuego(): Promise<void> {
+        console.log(chalk.yellow('\n🔄 Reiniciando sistemas...'));
+        
+        // Reiniciar estado del juego
+        this.gameState = {
+            codigoSeguridad: [],
+            distanciaCalculada: 0,
+            propulsoresFuncionando: [true, true],
+            misionCompleta: false,
+            combateActivo: false
+        };
         
         // Reiniciar sistemas
         this.godzilla = new GodzillaEngine();
-        this.propulsionSystem = new propulsores();
+        this.propulsion = new propulsores();
+        
+        await this.pausa(1000);
+        await this.iniciarJuego();
     }
 }
+
+// Función principal para ejecutar el juego
+async function main() {
+    const juego = new Game();
+    
+    try {
+        console.log(chalk.green.bold('🎮 SALVANDO AL MUNDO - INICIANDO...'));
+        await juego.iniciarJuego();
+        await juego.mostrarResumenFinal();
+        
+    } catch (error) {
+        console.log(chalk.red('❌ Error fatal del sistema:'), error);
+    }
+}
+
+// Ejecutar si este archivo se ejecuta directamente
+if (require.main === module) {
+    main();
+}
+
+export { main };
